@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>비교 우위와 교역 조건 – 함께 푸는 4문제</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root{
+    --bg:#f6f7fb; --card:#ffffff; --ink:#1b1f2a; --sub:#4b5565; --line:#cfd5e2;
+    --gap:#0b63ce;   /* 갑국: 파랑 + 원(●) */
+    --eul:#c75100;   /* 을국: 주황 + 네모(■) */
+    --ok:#00795c; --no:#b3261e; --zone:#009e73; --accent:#5b3cc4;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+    background:var(--bg); color:var(--ink); font-size:20px; line-height:1.6;
+  }
+  header{
+    position:sticky; top:0; z-index:5; background:#fff; border-bottom:2px solid var(--line);
+    padding:10px 16px; display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;
+  }
+  header h1{font-size:clamp(22px,2.6vw,32px); margin:0}
+  .nav{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+  button{
+    font:inherit; font-size:19px; cursor:pointer; border-radius:10px; border:2px solid var(--line);
+    background:#fff; color:var(--ink); padding:6px 14px;
+  }
+  button:hover{border-color:var(--accent)}
+  button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+  .nav .pg.on{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700}
+  main{max-width:1180px; margin:0 auto; padding:16px}
+  details.tips{background:#fff; border:2px dashed var(--line); border-radius:14px; padding:8px 16px; margin-bottom:14px}
+  details.tips summary{font-weight:700; cursor:pointer}
+  details.tips ul{margin:6px 0 4px; padding-left:1.2em}
+  .card{background:var(--card); border-radius:18px; box-shadow:0 2px 10px rgba(0,0,0,.06); padding:clamp(14px,2.5vw,32px)}
+  .qhead{display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap}
+  .num{font-size:clamp(30px,4vw,44px); font-weight:800; color:var(--accent); line-height:1}
+  .badge{display:inline-block; font-size:17px; font-weight:700; background:#efeaff; color:var(--accent); border-radius:999px; padding:2px 12px; margin-top:4px}
+  .qtitle{font-size:clamp(22px,2.4vw,30px); font-weight:800; margin:4px 0 0; flex:1 1 300px}
+  .box{border:2px solid var(--line); border-radius:14px; padding:14px 18px; margin:14px 0}
+  .box p{margin:0 0 10px}
+  table{border-collapse:collapse; width:100%; margin:8px 0; font-size:clamp(18px,2vw,22px)}
+  th,td{border:1.5px solid var(--line); padding:8px 10px; text-align:center}
+  thead th{background:#eef1f7}
+  td:first-child{font-weight:700; background:#fafbfd}
+  .gapc{color:var(--gap); font-weight:700}
+  .eulc{color:var(--eul); font-weight:700}
+  .bogi{position:relative; border:2px solid #9aa3b5; border-radius:14px; padding:18px 18px 10px; margin:18px 0 10px}
+  .bogi::before{content:"보기"; position:absolute; top:-14px; left:14px; background:#3b4252; color:#fff; font-size:16px; padding:0 10px; border-radius:6px}
+  .bogi p{margin:0 0 8px; padding-left:1.6em; text-indent:-1.6em}
+  .choices{list-style:none; padding:0; margin:10px 0; display:grid; gap:8px}
+  .choices.inline{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+  .choices button{width:100%; text-align:left; padding:8px 14px; border-width:2px}
+  .choices button.sel{border-color:var(--accent); background:#f3efff}
+  .choices button.right{border-color:var(--ok); background:#e3f6ef}
+  .choices button.wrong{border-color:var(--no); background:#fdeceb}
+  .choices button .mark{float:right; font-weight:800}
+  .actions{display:flex; flex-wrap:wrap; gap:10px; margin:16px 0 6px}
+  .actions .primary{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700}
+  .step{display:none; border-left:6px solid var(--accent); background:#fbfaff; border-radius:0 12px 12px 0; padding:12px 16px; margin:14px 0}
+  .step.show{display:block; animation:fade .35s ease}
+  .step h3{margin:0 0 8px; font-size:clamp(20px,2.2vw,26px)}
+  .step ul{margin:6px 0; padding-left:1.2em}
+  .judge li{margin:6px 0}
+  .o{color:var(--ok); font-weight:800}
+  .x{color:var(--no); font-weight:800}
+  .answer{display:none; font-size:clamp(22px,2.4vw,28px); font-weight:800; color:var(--ok); margin-top:10px}
+  .answer.show{display:block}
+  svg{width:100%; height:auto; display:block}
+  .hint{color:var(--sub); font-size:18px}
+  footer{max-width:1180px; margin:0 auto; padding:8px 16px 30px; color:var(--sub); font-size:16px}
+  kbd{border:1px solid #aaa; border-bottom-width:2px; border-radius:4px; padding:0 5px; font-size:15px; background:#fff}
+  @keyframes fade{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+  @media (max-width:520px){
+    body{font-size:18px}
+    button{font-size:17px; padding:6px 10px}
+    th,td{padding:6px 4px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title"></h1>
+  <div class="nav" id="nav"></div>
+</header>
+
+<main>
+  <details class="tips">
+    <summary>핵심 정리 펼치기 (풀기 전에 함께 읽기)</summary>
+    <ul>
+      <li><b>절대 우위</b>: 같은 재화를 <u>더 적은 비용(노동자 수·생산비)</u>으로, 또는 <u>같은 노동으로 더 많이</u> 생산하는 나라</li>
+      <li><b>비교 우위</b>: 그 재화를 생산하는 <u>기회비용이 더 작은</u> 나라 → 한 나라가 두 재화 모두에 비교 우위를 가질 수는 없다</li>
+      <li>노동자 수·생산비 표: <b>X재 기회비용 = X재 값 ÷ Y재 값</b> (작을수록 유리)</li>
+      <li>최대 생산량 표: <b>X재 기회비용 = Y재 생산량 ÷ X재 생산량</b> (거꾸로! 많을수록 유리)</li>
+      <li><b>교역 조건</b>: "X재와 Y재를 a : b로 교환" → X재 1단위 = Y재 b/a단위. 이 값이 <u>두 나라의 X재 기회비용 사이</u>에 있어야 양국 모두 이익</li>
+    </ul>
+  </details>
+
+  <section class="card" id="card" aria-live="polite"></section>
+</main>
+
+<footer>
+  <p id="source"></p>
+  <p>키보드: <kbd>←</kbd> <kbd>→</kbd> 문제 이동 · <kbd>↓</kbd> 다음 풀이 단계 · <kbd>F</kbd> 전체화면</p>
+</footer>
+
+<script>
+/* =====================================================================
+   CONFIG : 문제 문구·수치·정답·해설을 여기서 고치면 화면에 그대로 반영됩니다.
+   - answer : 정답 선지 번호(1~5)
+   - line   : 교역 조건 수직선 (값 = X재 1단위와 교환되는 Y재의 양)
+              low/high = 두 나라의 X재 1단위 생산 기회비용, marks = 문제에 나온 교환 비율
+   ===================================================================== */
+const CONFIG = {
+  title: "비교 우위와 교역 조건 · 함께 푸는 4문제",
+  source: "교과서·문제집의 비교 우위 문항 유형을 참고하여 수치와 보기를 새로 구성한 가상 문항입니다. (출처 표기: ○○출판사 『통합사회』 ○쪽 참고하여 재구성 — [확인 필요])",
+  problems: [
+    /* ---------------- 1번 : 생산비형 (새 문항) ---------------- */
+    {
+      badge: "생산비형",
+      question: "다음 자료에 관한 분석으로 옳은 것은?",
+      intro: "표는 X재와 Y재만을 생산하는 갑국과 을국의 X재, Y재 1단위의 생산비를 나타낸다. 양국은 비교 우위가 있는 재화만을 생산하여 양국 모두 이익이 발생하는 경우에만 교역한다. 단, 양국의 생산 요소는 노동뿐이고, 보유한 생산 요소의 양은 같으며, 거래 비용은 없다.",
+      table: { head: ["구분", "갑국", "을국"], rows: [["X재", "10달러", "40달러"], ["Y재", "30달러", "20달러"]] },
+      outro: "",
+      bogi: null,
+      choices: [
+        "갑국은 Y재 생산에 절대 우위를 가진다.",
+        "을국의 X재 1단위 생산의 기회비용은 Y재 1/2단위이다.",
+        "갑국은 Y재 생산에 비교 우위를 가진다.",
+        "X재와 Y재의 교환 비율이 1 : 1이면, 양국 모두 교역으로 이익을 얻는다.",
+        "을국은 X재와 Y재 생산 모두에 비교 우위를 가진다."
+      ],
+      answer: 4,
+      calc: {
+        head: ["포기하는 양(기회비용)", "갑국", "을국"],
+        rows: [
+          ["X재 1개 만들면", "10 ÷ 30 = Y재 1/3개", "40 ÷ 20 = Y재 2개"],
+          ["Y재 1개 만들면", "30 ÷ 10 = X재 3개", "20 ÷ 40 = X재 1/2개"]
+        ],
+        notes: [
+          "생산비가 <b>싼 나라</b>가 절대 우위 → X재는 <span class='gapc'>갑국</span>(10달러), Y재는 <span class='eulc'>을국</span>(20달러)",
+          "기회비용 = ‘X재 1개 만들 돈이면 Y재를 몇 개 만들 수 있나?’ → 갑국 10달러로 Y재(30달러) <b>1/3개</b>, 을국 40달러로 Y재(20달러) <b>2개</b>",
+          "<b>덜 포기하는 나라</b>가 비교 우위 → X재는 갑국, Y재는 을국"
+        ]
+      },
+      line: { low: { v: 1/3, who: "갑국" }, high: { v: 2, who: "을국" },
+              marks: [{ v: 1, label: "④ 1:1" }] },
+      judge: [
+        ["①", false, "Y재는 을국이 20달러로 더 싸게 만든다 → Y재 절대 우위는 을국"],
+        ["②", false, "을국은 X재 1개(40달러) 만들 돈으로 Y재(20달러)를 <b>2개</b> 만들 수 있다. 1/2은 거꾸로 나눈 것!"],
+        ["③", false, "Y재 1개를 만들 때 갑국은 X재 3개, 을국은 X재 1/2개를 포기 → 덜 포기하는 을국이 Y재 비교 우위"],
+        ["④", true, "1:1이면 X재 1개 = Y재 1개. 갑국은 Y재 1/3개짜리 X재로 Y재 1개를 받으니 이득, 을국은 직접 만들면 Y재 2개를 포기할 X재를 Y재 1개로 사니 이득 → 둘 다 이득!"],
+        ["⑤", false, "비교 우위는 ‘누가 덜 포기하나’를 비교한 것이라 한 나라가 두 재화 모두 가질 수 없다"]
+      ]
+    },
+
+    /* ---------------- 2번 : 생산량형 (새 문항) ---------------- */
+    {
+      badge: "최대 생산량형",
+      question: "자료에 관한 옳은 분석만을 〈보기〉에서 고른 것은?",
+      intro: "표는 갑국과 을국이 보유한 노동을 모두 한 재화의 생산에만 투입했을 때 생산할 수 있는 X재, Y재의 최대 생산량을 나타낸다. 양국은 X재와 Y재만을 생산하며, 비교 우위가 있는 재화만을 생산하여 양국 모두 이익이 발생하는 조건에서 교역하기로 하였다. 단, 생산 요소는 노동뿐이고, 양국이 보유한 노동의 양은 같으며, 기회비용은 생산량과 관계없이 일정하고, 거래 비용은 없다.",
+      table: { head: ["구분", "갑국", "을국"], rows: [["X재", "60개", "40개"], ["Y재", "30개", "120개"]] },
+      outro: "",
+      bogi: [
+        ["ㄱ", "갑국은 X재와 Y재 생산 모두에 절대 우위를 가진다."],
+        ["ㄴ", "을국의 Y재 1단위 생산의 기회비용은 X재 1/3단위이다."],
+        ["ㄷ", "특화 후 양국의 X재 총생산량은 60개이다."],
+        ["ㄹ", "X재와 Y재를 1 : 2의 비율로 교환하는 조건이라면, 갑국은 무역에 참여하지 않을 것이다."]
+      ],
+      choices: ["ㄱ, ㄴ", "ㄱ, ㄷ", "ㄴ, ㄷ", "ㄴ, ㄹ", "ㄷ, ㄹ"],
+      answer: 3,
+      calc: {
+        head: ["포기하는 양(기회비용)", "갑국", "을국"],
+        rows: [
+          ["X재 1개 만들면", "30 ÷ 60 = Y재 1/2개", "120 ÷ 40 = Y재 3개"],
+          ["Y재 1개 만들면", "60 ÷ 30 = X재 2개", "40 ÷ 120 = X재 1/3개"]
+        ],
+        notes: [
+          "생산량은 <b>많이 만드는 나라</b>가 절대 우위 → X재 <span class='gapc'>갑국</span>(60개), Y재 <span class='eulc'>을국</span>(120개)",
+          "갑국은 X재 60개 대신 Y재 30개 → X재 1개 = Y재 <b>1/2개</b> 포기 · 을국은 X재 40개 대신 Y재 120개 → X재 1개 = Y재 <b>3개</b> 포기",
+          "주의! 생산량 표는 나누는 순서가 노동자 수·생산비 표와 <b>반대</b>"
+        ]
+      },
+      line: { low: { v: 1/2, who: "갑국" }, high: { v: 3, who: "을국" },
+              marks: [{ v: 2, label: "ㄹ 1:2" }] },
+      judge: [
+        ["ㄱ", false, "X재는 갑국이 더 많이(60개), Y재는 을국이 더 많이(120개) 만든다"],
+        ["ㄴ", true, "을국은 Y재 120개 대신 X재 40개 → Y재 1개를 만들면 X재 1/3개를 포기"],
+        ["ㄷ", true, "갑국은 X재만, 을국은 Y재만 만든다 → X재는 갑국이 만든 60개가 전부"],
+        ["ㄹ", false, "1:2면 X재 1개 = Y재 2개. 갑국은 X재 1개로 원래 Y재 1/2개밖에 못 만드는데 2개를 받으니 이득 → 참여한다"]
+      ]
+    },
+
+    /* ---------------- 3번 : 노동자 수형 (12번 변형) ---------------- */
+    {
+      badge: "노동자 수형",
+      question: "자료에 관한 옳은 분석만을 〈보기〉에서 고른 것은?",
+      intro: "갑국과 을국은 X재, Y재만을 생산·소비하며, 비교 우위가 있는 재화만을 생산하여 양국 모두 이득이 발생하는 조건에서 교역하기로 하였다. 표는 갑국, 을국이 각 재화 1단위 생산에 필요한 노동자 수를 나타낸다. 단, 양국은 노동만을 생산 요소로 사용하고, 보유한 생산 요소의 양은 동일하며, 노동의 이동과 거래 비용은 없다.",
+      table: { head: ["구분", "갑국", "을국"], rows: [["X재", "6명", "8명"], ["Y재", "12명", "4명"]] },
+      outro: "",
+      bogi: [
+        ["ㄱ", "갑국은 X재 생산에 절대 우위를 가진다."],
+        ["ㄴ", "을국은 X재 생산에 비교 우위를 가진다."],
+        ["ㄷ", "X재와 Y재를 1 : 3의 비율로 교환하는 조건이라면, 을국은 무역에 참여하지 않을 것이다."],
+        ["ㄹ", "X재와 Y재를 1 : 1의 비율로 교환하는 조건이라면, 갑국은 무역에 참여하지 않을 것이다."]
+      ],
+      choices: ["ㄱ, ㄴ", "ㄱ, ㄷ", "ㄴ, ㄷ", "ㄴ, ㄹ", "ㄷ, ㄹ"],
+      answer: 2,
+      calc: {
+        head: ["포기하는 양(기회비용)", "갑국", "을국"],
+        rows: [
+          ["X재 1개 만들면", "6 ÷ 12 = Y재 1/2개", "8 ÷ 4 = Y재 2개"],
+          ["Y재 1개 만들면", "12 ÷ 6 = X재 2개", "4 ÷ 8 = X재 1/2개"]
+        ],
+        notes: [
+          "노동자가 <b>적게 드는 나라</b>가 절대 우위 → X재 <span class='gapc'>갑국</span>(6명), Y재 <span class='eulc'>을국</span>(4명)",
+          "기회비용 = ‘X재 1개 만들 사람으로 Y재를 몇 개 만들 수 있나?’ → 갑국 6명으로 Y재(12명) <b>1/2개</b>, 을국 8명으로 Y재(4명) <b>2개</b>",
+          "<b>덜 포기하는 나라</b>가 비교 우위 → X재는 갑국, Y재는 을국"
+        ]
+      },
+      line: { low: { v: 1/2, who: "갑국" }, high: { v: 2, who: "을국" },
+              marks: [{ v: 3, label: "ㄷ 1:3" }, { v: 1, label: "ㄹ 1:1" }] },
+      judge: [
+        ["ㄱ", true, "X재 1개에 갑국 6명, 을국 8명 → 갑국이 더 적은 사람으로 만든다"],
+        ["ㄴ", false, "X재 1개를 만들 때 갑국은 Y재 1/2개, 을국은 Y재 2개 포기 → 덜 포기하는 갑국이 X재 비교 우위"],
+        ["ㄷ", true, "1:3이면 X재 1개를 사려면 Y재 3개를 줘야 한다. 을국은 직접 만들면 Y재 2개만 포기하면 되니 사는 게 손해 → 참여 안 함"],
+        ["ㄹ", false, "1:1이면 X재 1개 = Y재 1개. 갑국은 Y재 1/2개짜리 X재로 Y재 1개를 받으니 이득 → 참여한다"]
+      ]
+    },
+
+    /* ---------------- 4번 : 기회비용+생산비형 (11번 변형) ---------------- */
+    {
+      badge: "기회비용·생산비형",
+      question: "다음 자료에 관한 분석으로 옳지 않은 것은?",
+      intro: "표는 X재와 Y재만을 생산하는 갑국과 을국의 X재, Y재 1단위 생산의 기회비용과 Y재 1단위의 생산비를 나타낸다.",
+      table: { head: ["구분", "갑국", "을국"], rows: [
+        ["X재 1단위 생산의 기회비용", "Y재 1/2단위", "Y재 4단위"],
+        ["Y재 1단위 생산의 기회비용", "X재 2단위", "X재 1/4단위"],
+        ["Y재 1단위의 생산비", "40달러", "20달러"]
+      ] },
+      outro: "갑국과 을국은 비교 우위가 있는 상품만을 생산하여 이득이 발생할 경우에만 거래 비용 없이 교역한다. 단, 갑국과 을국의 생산 요소는 노동뿐이고, 양국이 보유한 생산 요소의 양은 같으며, 양국 간 노동의 이동은 없다.",
+      bogi: null,
+      choices: [
+        "을국은 X재와 Y재 생산 모두에 절대 우위를 가진다.",
+        "갑국은 X재 생산에 비교 우위를 가진다.",
+        "X재 1단위의 생산비는 을국이 갑국의 4배이다.",
+        "갑국은 Y재 1단위의 생산비가 X재 1단위의 생산비의 2배이다.",
+        "X재와 Y재의 교환 비율이 1 : 3이면, 양국 모두 교역에 참여할 것이다."
+      ],
+      answer: 1,
+      calc: {
+        head: ["생산비", "갑국", "을국"],
+        rows: [
+          ["X재 1개 만들면", "40 × 1/2 = 20달러", "20 × 4 = 80달러"],
+          ["Y재 1개 만들면", "40달러", "20달러"]
+        ],
+        notes: [
+          "X재 1개를 만들면 Y재를 얼마나 포기하나? → 갑국은 Y재 1/2개 = 40달러의 절반 = <b>20달러</b>, 을국은 Y재 4개 = 20달러 × 4 = <b>80달러</b>",
+          "생산비가 <b>싼 나라</b>가 절대 우위 → X재 <span class='gapc'>갑국</span>(20달러), Y재 <span class='eulc'>을국</span>(20달러)"
+        ]
+      },
+      line: { low: { v: 1/2, who: "갑국" }, high: { v: 4, who: "을국" },
+              marks: [{ v: 3, label: "⑤ 1:3" }] },
+      judge: [
+        ["①", false, "X재는 갑국이 20달러로 을국(80달러)보다 싸게 만든다 → 을국은 Y재에만 절대 우위. 그래서 ‘옳지 않은 것’의 정답!"],
+        ["②", true, "X재 1개를 만들 때 갑국은 Y재 1/2개, 을국은 Y재 4개 포기 → 덜 포기하는 갑국이 비교 우위"],
+        ["③", true, "을국 80달러는 갑국 20달러의 4배"],
+        ["④", true, "갑국은 Y재 40달러, X재 20달러 → 2배"],
+        ["⑤", true, "1:3이면 X재 1개 = Y재 3개. 갑국은 원래 Y재 1/2개 → 3개 받으니 이득, 을국은 직접 만들면 Y재 4개 → 3개만 주니 이득 → 둘 다 참여"]
+      ]
+    }
+  ]
+};
+
+/* ===================== 아래는 화면 구성 코드 ===================== */
+const NUM = ["①", "②", "③", "④", "⑤"];
+let cur = 0;
+const state = CONFIG.problems.map(() => ({ step: 0, sel: null, checked: false }));
+
+document.getElementById("title").textContent = CONFIG.title;
+document.getElementById("source").textContent = CONFIG.source;
+
+/* 소수를 분수 문자열로 (분모 8 이하) */
+function frac(v) {
+  if (Math.abs(v - Math.round(v)) < 1e-9) return String(Math.round(v));
+  for (let d = 2; d <= 8; d++) {
+    const n = v * d;
+    if (Math.abs(n - Math.round(n)) < 1e-9) return Math.round(n) + "/" + d;
+  }
+  return v.toFixed(2);
+}
+
+/* 교역 조건 수직선 SVG (로그 눈금, 1/8 ~ 8) */
+function lineSVG(L) {
+  const W = 900, pad = 50;
+  const x = v => pad + (Math.log2(v) + 3) / 6 * (W - 2 * pad);
+  const xl = x(L.low.v), xh = x(L.high.v);
+  const ticks = [1/4, 1/3, 1/2, 1, 3/2, 2, 3, 4];
+  let top = "";
+  let s = `<svg viewBox="0 0 ${W} 300" role="img" aria-label="교역 조건 범위 수직선"><g transform="translate(0,30)">
+  <defs><pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <line x1="0" y1="0" x2="0" y2="10" stroke="#009e73" stroke-width="3" opacity=".35"/></pattern></defs>
+  <rect x="${xl}" y="68" width="${xh - xl}" height="52" fill="#009e73" opacity=".12"/>
+  <rect x="${xl}" y="68" width="${xh - xl}" height="52" fill="url(#hatch)"/>
+  <text x="${(xl + xh) / 2}" y="100" text-anchor="middle" font-size="19" font-weight="700" fill="#00634b">둘 다 이득</text>
+  <line x1="${pad - 20}" y1="120" x2="${W - pad + 20}" y2="120" stroke="#1b1f2a" stroke-width="3"/>`;
+  ticks.forEach(t => {
+    s += `<line x1="${x(t)}" y1="114" x2="${x(t)}" y2="126" stroke="#1b1f2a" stroke-width="2"/>
+          <text x="${x(t)}" y="150" text-anchor="middle" font-size="18" fill="#4b5565">${frac(t)}</text>`;
+  });
+  /* 갑국: 파란 원 / 을국: 주황 네모 (색 + 모양으로 구분) */
+  s += `<line x1="${xl}" y1="60" x2="${xl}" y2="120" stroke="#0b63ce" stroke-width="3" stroke-dasharray="6 4"/>
+        <circle cx="${xl}" cy="120" r="10" fill="#0b63ce"/>
+        <text x="${xl}" y="185" text-anchor="middle" font-size="18" font-weight="700" fill="#0b63ce">● ${L.low.who} Y재 ${frac(L.low.v)}개</text>
+        <line x1="${xh}" y1="60" x2="${xh}" y2="120" stroke="#c75100" stroke-width="3" stroke-dasharray="2 4"/>
+        <rect x="${xh - 10}" y="110" width="20" height="20" fill="#c75100"/>
+        <text x="${xh}" y="185" text-anchor="middle" font-size="18" font-weight="700" fill="#c75100">■ ${L.high.who} Y재 ${frac(L.high.v)}개</text>
+        <text x="${pad - 10}" y="222" font-size="17" fill="#b3261e">← ${L.low.who} 손해(불참)</text>
+        <text x="${W - pad + 10}" y="222" text-anchor="end" font-size="17" fill="#b3261e">${L.high.who} 손해(불참) →</text>
+        <text x="${W / 2}" y="258" text-anchor="middle" font-size="17" fill="#4b5565">X재 1개를 주고 받는 Y재의 개수</text>`;
+  L.marks.forEach((m, i) => {
+    const mx = x(m.v);
+    const inside = m.v > L.low.v && m.v < L.high.v;
+    const col = inside ? "#00795c" : "#b3261e";
+    s += `<polygon points="${mx - 9},38 ${mx + 9},38 ${mx},54" fill="${col}"/>
+`;
+    top += `<text x="${mx}" y="${20 + i * 26}" text-anchor="middle" font-size="18" font-weight="800" fill="${col}">${m.label} → Y재 ${frac(m.v)}개 ${inside ? "○ 둘 다 이득" : "× 한쪽 손해"}</text>`;
+  });
+  return s + "</g>" + top + "</svg>";
+}
+
+function tableHTML(t) {
+  const head = t.head.map((h, i) => `<th class="${i === 1 ? "gapc" : i === 2 ? "eulc" : ""}">${h}</th>`).join("");
+  const body = t.rows.map(r => "<tr>" + r.map(c => `<td>${c}</td>`).join("") + "</tr>").join("");
+  return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
+function render() {
+  const p = CONFIG.problems[cur], st = state[cur];
+  const card = document.getElementById("card");
+  const isBogi = !!p.bogi;
+  let h = `<div class="qhead"><span class="num">${cur + 1}</span>
+      <div style="flex:1 1 300px"><span class="badge">${p.badge}</span><p class="qtitle">${p.question}</p></div></div>
+    <div class="box"><p>${p.intro}</p>${tableHTML(p.table)}${p.outro ? `<p>${p.outro}</p>` : ""}</div>`;
+  if (isBogi) h += `<div class="bogi">${p.bogi.map(b => `<p>${b[0]}. ${b[1]}</p>`).join("")}</div>`;
+  h += `<ul class="choices ${isBogi ? "inline" : ""}">` + p.choices.map((c, i) => {
+    let cls = st.sel === i ? "sel" : "", mark = "";
+    if (st.checked) {
+      if (i === p.answer - 1) { cls = "right"; mark = "정답"; }
+      else if (st.sel === i) { cls = "wrong"; mark = "×"; }
+    }
+    return `<li><button class="${cls}" data-c="${i}">${NUM[i]} ${c}<span class="mark">${mark}</span></button></li>`;
+  }).join("") + `</ul>`;
+  h += `<div class="actions">
+      <button class="primary" id="next">풀이 다음 단계 (${st.step}/3)</button>
+      <button id="check">정답 확인</button>
+      <button id="reset">다시 풀기</button></div>
+    <p class="hint">선지를 눌러 고른 뒤 ‘정답 확인’ · 풀이는 단계별로 열립니다.</p>`;
+  /* 1단계: 기회비용(생산비) 계산 */
+  h += `<div class="step ${st.step >= 1 ? "show" : ""}"><h3>1단계 · 누가 덜 포기할까?</h3>${tableHTML(p.calc)}
+      <ul>${p.calc.notes.map(n => `<li>${n}</li>`).join("")}</ul></div>`;
+  /* 2단계: 수직선 */
+  h += `<div class="step ${st.step >= 2 ? "show" : ""}"><h3>2단계 · 이 비율이면 둘 다 이득일까?</h3>
+      <ul><li>X재를 <b>파는</b> <span class="gapc">${p.line.low.who}</span>: 직접 만들면 Y재 ${frac(p.line.low.v)}개 → 이것보다 <b>많이 받아야</b> 이득</li>
+      <li>X재를 <b>사는</b> <span class="eulc">${p.line.high.who}</span>: 직접 만들면 Y재 ${frac(p.line.high.v)}개 → 이것보다 <b>적게 줘야</b> 이득</li>
+      <li>그래서 교환 비율이 <b>두 숫자 사이(초록색)</b>에 있어야 둘 다 교역한다!</li></ul>${lineSVG(p.line)}</div>`;
+  /* 3단계: 판정 */
+  h += `<div class="step ${st.step >= 3 ? "show" : ""}"><h3>3단계 · ${isBogi ? "보기" : "선지"}별 판정</h3>
+      <ul class="judge">${p.judge.map(j => `<li><b>${j[0]}</b> <span class="${j[1] ? "o" : "x"}">${j[1] ? "○" : "×"}</span> ${j[2]}</li>`).join("")}</ul></div>`;
+  h += `<div class="answer ${st.checked ? "show" : ""}">정답: ${NUM[p.answer - 1]} ${isBogi ? p.choices[p.answer - 1] : ""}</div>`;
+  card.innerHTML = h;
+
+  card.querySelectorAll("[data-c]").forEach(b => b.onclick = () => {
+    st.sel = +b.dataset.c; st.checked = false; render();
+  });
+  document.getElementById("next").onclick = nextStep;
+  document.getElementById("check").onclick = () => { st.checked = true; render(); };
+  document.getElementById("reset").onclick = () => { state[cur] = { step: 0, sel: null, checked: false }; render(); };
+  renderNav();
+}
+
+function nextStep() { const st = state[cur]; if (st.step < 3) { st.step++; render(); } }
+
+function renderNav() {
+  const nav = document.getElementById("nav");
+  nav.innerHTML = `<button id="prev" aria-label="이전 문제">◀</button>` +
+    CONFIG.problems.map((_, i) => `<button class="pg ${i === cur ? "on" : ""}" data-p="${i}">${i + 1}번</button>`).join("") +
+    `<button id="nextp" aria-label="다음 문제">▶</button><button id="fs">⛶ 전체화면</button>`;
+  nav.querySelectorAll("[data-p]").forEach(b => b.onclick = () => go(+b.dataset.p));
+  document.getElementById("prev").onclick = () => go(cur - 1);
+  document.getElementById("nextp").onclick = () => go(cur + 1);
+  document.getElementById("fs").onclick = toggleFS;
+}
+
+function go(i) {
+  if (i < 0 || i >= CONFIG.problems.length) return;
+  cur = i; render(); window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function toggleFS() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight") go(cur + 1);
+  else if (e.key === "ArrowLeft") go(cur - 1);
+  else if (e.key === "ArrowDown") { e.preventDefault(); nextStep(); }
+  else if (e.key === "f" || e.key === "F") toggleFS();
+});
+
+render();
+</script>
+</body>
+</html>
